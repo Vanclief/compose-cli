@@ -1,10 +1,39 @@
 package generators
 
 import (
+	"bufio"
 	"os"
+	"strings"
 
 	"github.com/vanclief/ez"
 )
+
+func getModulePath() (string, error) {
+	const op = "getModulePath"
+
+	file, err := os.Open("go.mod")
+	if err != nil {
+		return "", ez.New(op, ez.EINVALID, "Error opening go.mod", err)
+	}
+
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	if scanner.Scan() { // Read the first line
+
+		firstLine := scanner.Text()
+		modulePath := strings.TrimSpace(firstLine)
+
+		if strings.HasPrefix(modulePath, "module") {
+			modulePath = strings.TrimPrefix(modulePath, "module")
+			modulePath = strings.TrimSpace(modulePath) // Remove any spaces after "module"
+
+			return modulePath, nil
+		}
+	}
+
+	return "", ez.New(op, ez.EINVALID, "Error reading from go.mod", nil)
+}
 
 func folderExists(path string) error {
 	const op = "folderExists"
