@@ -5,21 +5,22 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	"text/template"
 
 	"github.com/fatih/color"
 	"github.com/vanclief/compose-cli/generators/templates"
+	"github.com/vanclief/ez"
 )
 
 const RESOURCES_PATH = "application/resources"
 
 func NewResourceAPI() error {
+	const op = "generators.NewResourceAPI"
+
 	color.Cyan("Generating a new resource")
 
 	// Get the module path
 	modulePath, err := getModulePath()
 	if err != nil {
-		color.Red(err.Error())
 		return err
 	}
 
@@ -27,8 +28,7 @@ func NewResourceAPI() error {
 	err = folderExists(RESOURCES_PATH)
 	if err != nil {
 		errMsg := fmt.Sprintf(`Resources folder "%s" doesn't exist`, RESOURCES_PATH)
-		color.Red(errMsg)
-		return err
+		return ez.New(op, ez.ECONFLICT, errMsg, err)
 	}
 
 	// Get the resource name
@@ -36,8 +36,7 @@ func NewResourceAPI() error {
 	reader := bufio.NewReader(os.Stdin)
 	resourceName, err := reader.ReadString('\n')
 	if err != nil {
-		color.Red("Error reading input")
-		return err
+		return ez.New(op, ez.EINTERNAL, "Error reading input", err)
 	}
 
 	resourceName = strings.ToLower(strings.TrimSpace(resourceName))
@@ -49,51 +48,46 @@ func NewResourceAPI() error {
 	err = folderExists(dirPath)
 	if err == nil {
 		errMsg := fmt.Sprintf(`%s already exists`, dirPath)
-		color.Red(errMsg)
-		return err
+		return ez.New(op, ez.ECONFLICT, errMsg, err)
 	}
 
-	err = os.Mkdir(dirPath, 0755)
+	err = os.Mkdir(dirPath, 0o755)
 	if err != nil {
 		errMsg := fmt.Sprintf("Error creating directory:", err)
-		color.Red(errMsg)
-		return err
+		return ez.New(op, ez.ECONFLICT, errMsg, err)
 	}
 
-	// Create the file
-	tmpl, err := template.ParseFS(templates.FS, "api.go.tpl")
-	if err != nil {
-		errMsg := fmt.Sprintf("Error parsing template: %v", err)
-		color.Red(errMsg)
-		return err
-	}
-
-	filePath := fmt.Sprintf("%s/%s/%s.go", RESOURCES_PATH, resourceName, "api")
-	f, err := os.Create(filePath)
-	if err != nil {
-		errMsg := fmt.Sprintf("Error creating file: %v", err)
-		color.Red(errMsg)
-		return err
-	}
-
-	defer f.Close()
+	// Create the file API File
+	filePath := fmt.Sprintf("%s/%s/api.go", RESOURCES_PATH, resourceName)
 
 	apiData := templates.APIData{
 		PackageName: resourceName,
 		ModulePath:  modulePath,
 	}
 
-	err = tmpl.Execute(f, apiData)
+	err = createFileFromTemplate(filePath, "api.go.tpl", apiData)
 	if err != nil {
-		errMsg := fmt.Sprintf("Error executing template: %v", err)
-		color.Red(errMsg)
-		return err
+		return ez.Wrap(op, err)
+	}
+
+	// Create the file API Test File
+	filePath = fmt.Sprintf("%s/%s/api_test.go", RESOURCES_PATH, resourceName)
+
+	apiTestData := templates.APITestData{
+		PackageName: resourceName,
+		ModulePath:  modulePath,
+		SuiteName:   strings.ToUpper(resourceName[:1]) + resourceName[1:] + "Suite",
+	}
+
+	err = createFileFromTemplate(filePath, "api_test.go.tpl", apiTestData)
+	if err != nil {
+		return ez.Wrap(op, err)
 	}
 
 	return nil
 }
 
-func NewAPIMethod() error {
+func NewResourceMethod() error {
 	color.Green("Generating api method...")
 	return nil
 }

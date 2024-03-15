@@ -2,9 +2,12 @@ package generators
 
 import (
 	"bufio"
+	"fmt"
 	"os"
 	"strings"
+	"text/template"
 
+	"github.com/vanclief/compose-cli/generators/templates"
 	"github.com/vanclief/ez"
 )
 
@@ -45,4 +48,31 @@ func folderExists(path string) error {
 	} else {
 		return ez.New(op, ez.EINTERNAL, "Error checking folder.", err)
 	}
+}
+
+func createFileFromTemplate(filePath, templatePath string, templateData interface{}) error {
+	const op = "generators.createFileFromTemplate"
+
+	// Create the file
+	tmpl, err := template.ParseFS(templates.FS, templatePath)
+	if err != nil {
+		errMsg := fmt.Sprintf("Error parsing template: %v", err)
+		return ez.New(op, ez.EINTERNAL, errMsg, err)
+	}
+
+	f, err := os.Create(filePath)
+	if err != nil {
+		errMsg := fmt.Sprintf("Error creating file: %v", err)
+		return ez.New(op, ez.EINTERNAL, errMsg, err)
+	}
+
+	defer f.Close()
+
+	err = tmpl.Execute(f, templateData)
+	if err != nil {
+		errMsg := fmt.Sprintf("Error executing template: %v", err)
+		return ez.New(op, ez.EINTERNAL, errMsg, err)
+	}
+
+	return nil
 }

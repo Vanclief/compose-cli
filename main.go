@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 
+	"github.com/fatih/color"
 	"github.com/urfave/cli/v2"
 	"github.com/vanclief/compose-cli/generators"
 )
@@ -35,7 +36,7 @@ func main() {
 							Name:  "method",
 							Usage: "Generate the API resource method",
 							Action: func(c *cli.Context) error {
-								return generators.NewAPIMethod()
+								return generators.NewResourceMethod()
 							},
 						},
 					},
@@ -54,6 +55,7 @@ func main() {
 
 	err := app.Run(os.Args)
 	if err != nil {
+		color.Red(err.Error())
 		os.Exit(0)
 	}
 }
