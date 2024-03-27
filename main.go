@@ -6,9 +6,8 @@ import (
 	"github.com/fatih/color"
 	"github.com/urfave/cli/v2"
 	"github.com/vanclief/compose-cli/generators"
+	"github.com/vanclief/ez"
 )
-
-var duplicatesMap = make(map[interface{}]bool)
 
 func main() {
 	app := cli.NewApp()
@@ -35,8 +34,17 @@ func main() {
 						{
 							Name:  "method",
 							Usage: "Generate the API resource method",
+							Flags: []cli.Flag{
+								&cli.BoolFlag{
+									Name:    "force",
+									Usage:   "Force the creation of the resource method even if it already exists",
+									Aliases: []string{"f"},
+								},
+							},
 							Action: func(c *cli.Context) error {
-								return generators.NewResourceMethod()
+								forceFlag := c.Bool("force")
+
+								return generators.NewResourceMethod(forceFlag)
 							},
 						},
 					},
@@ -55,7 +63,7 @@ func main() {
 
 	err := app.Run(os.Args)
 	if err != nil {
-		color.Red(err.Error())
+		color.Red(ez.ErrorMessage(err))
 		os.Exit(0)
 	}
 }

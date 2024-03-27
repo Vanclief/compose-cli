@@ -16,23 +16,17 @@ const RESOURCES_PATH = "application/resources"
 func NewResourceAPI() error {
 	const op = "generators.NewResourceAPI"
 
-	color.Cyan("Generating a new resource")
-
-	// Get the module path
-	modulePath, err := getModulePath()
-	if err != nil {
-		return err
-	}
+	color.Cyan("Generate a new resource")
 
 	// Check the folder exists
-	err = folderExists(RESOURCES_PATH)
+	err := dirExists(RESOURCES_PATH)
 	if err != nil {
 		errMsg := fmt.Sprintf(`Resources folder "%s" doesn't exist`, RESOURCES_PATH)
 		return ez.New(op, ez.ECONFLICT, errMsg, err)
 	}
 
 	// Get the resource name
-	color.Yellow("Resource name (plural): ")
+	color.Yellow("Enter resource name (plural): ")
 	reader := bufio.NewReader(os.Stdin)
 	resourceName, err := reader.ReadString('\n')
 	if err != nil {
@@ -45,19 +39,17 @@ func NewResourceAPI() error {
 	// Create the resource folder
 	dirPath := fmt.Sprintf("%s/%s", RESOURCES_PATH, resourceName)
 
-	err = folderExists(dirPath)
-	if err == nil {
-		errMsg := fmt.Sprintf(`%s already exists`, dirPath)
-		return ez.New(op, ez.ECONFLICT, errMsg, err)
-	}
-
-	err = os.Mkdir(dirPath, 0o755)
+	err = createDir(dirPath)
 	if err != nil {
-		errMsg := fmt.Sprintf("Error creating directory:", err)
-		return ez.New(op, ez.ECONFLICT, errMsg, err)
+		return ez.Wrap(op, err)
 	}
 
 	// Create the file API File
+	modulePath, err := getModulePath()
+	if err != nil {
+		return ez.Wrap(op, err)
+	}
+
 	filePath := fmt.Sprintf("%s/%s/api.go", RESOURCES_PATH, resourceName)
 
 	apiData := templates.APIData{
@@ -65,7 +57,7 @@ func NewResourceAPI() error {
 		ModulePath:  modulePath,
 	}
 
-	err = createFileFromTemplate(filePath, "api.go.tpl", apiData)
+	err = createFileFromTemplate(filePath, "api.go.tpl", apiData, false)
 	if err != nil {
 		return ez.Wrap(op, err)
 	}
@@ -79,15 +71,10 @@ func NewResourceAPI() error {
 		SuiteName:   strings.ToUpper(resourceName[:1]) + resourceName[1:] + "Suite",
 	}
 
-	err = createFileFromTemplate(filePath, "api_test.go.tpl", apiTestData)
+	err = createFileFromTemplate(filePath, "api_test.go.tpl", apiTestData, false)
 	if err != nil {
 		return ez.Wrap(op, err)
 	}
 
-	return nil
-}
-
-func NewResourceMethod() error {
-	color.Green("Generating api method...")
 	return nil
 }

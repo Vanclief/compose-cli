@@ -845,6 +845,8 @@ github.com/stretchr/testify v1.8.1/go.mod h1:w2LPCIKwWwSfY2zedu0+kehJoqGctiVI29o
 github.com/stretchr/testify v1.8.3/go.mod h1:sz/lmYIOXD/1dqDmKjjqLyZ2RngseejIcXlSw2iwfAo=
 github.com/urfave/cli/v2 v2.27.1 h1:8xSQ6szndafKVRmfyeUMxkNUJQMjL1F2zmsZ+qHpfho=
 github.com/urfave/cli/v2 v2.27.1/go.mod h1:8qnjx1vcq5s2/wpsqoZFndg2CE5tNFyrTvS6SinrnYQ=
+github.com/vanclief/compose v1.0.7 h1:H7RzD/UWlq9VEZ2axxi3KMqSvhoWXWjICijgw+oYJDc=
+github.com/vanclief/compose v1.0.7/go.mod h1:VwXYTlXJB2HnqRcmlw4ZkJZs3MOciRhgdinC1B/OgS4=
 github.com/vanclief/ez v1.3.5 h1:biO5cMBpEtiwlo1Hj83buQsC+xbX4utNUx9PFEi1Y0c=
 github.com/vanclief/ez v1.3.5/go.mod h1:LvrMsdtIljKsiQzpS8WZaXK8wPZSaekzl+sn5dCEo0E=
 github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 h1:bAn7/zixMGCfxrRTfdpNzjtPYqr8smhKouy9mxVdGPU=

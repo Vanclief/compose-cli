@@ -6,6 +6,8 @@ import (
 	"os"
 	"strings"
 	"text/template"
+	"unicode"
+	"unicode/utf8"
 
 	"github.com/vanclief/compose-cli/generators/templates"
 	"github.com/vanclief/ez"
@@ -38,8 +40,8 @@ func getModulePath() (string, error) {
 	return "", ez.New(op, ez.EINVALID, "Error reading from go.mod", nil)
 }
 
-func folderExists(path string) error {
-	const op = "folderExists"
+func dirExists(path string) error {
+	const op = "dirExists"
 
 	if info, err := os.Stat(path); err == nil && info.IsDir() {
 		return nil
@@ -50,8 +52,33 @@ func folderExists(path string) error {
 	}
 }
 
-func createFileFromTemplate(filePath, templatePath string, templateData interface{}) error {
+func createDir(path string) error {
+	const op = "createDir"
+
+	err := dirExists(path)
+	if err == nil {
+		errMsg := fmt.Sprintf(`%s already exists`, path)
+		return ez.New(op, ez.ECONFLICT, errMsg, err)
+	}
+
+	err = os.Mkdir(path, 0o755)
+	if err != nil {
+		errMsg := fmt.Sprintf("Error creating directory:", err)
+		return ez.New(op, ez.ECONFLICT, errMsg, err)
+	}
+
+	return nil
+}
+
+func createFileFromTemplate(filePath, templatePath string, templateData interface{}, force bool) error {
 	const op = "generators.createFileFromTemplate"
+
+	// Check if the file already exists
+	_, err := os.Stat(filePath)
+	if !force && err == nil {
+		errMsg := fmt.Sprintf("File already exists: %s", filePath)
+		return ez.New(op, ez.ECONFLICT, errMsg, nil)
+	}
 
 	// Create the file
 	tmpl, err := template.ParseFS(templates.FS, templatePath)
@@ -75,4 +102,40 @@ func createFileFromTemplate(filePath, templatePath string, templateData interfac
 	}
 
 	return nil
+}
+
+// contains checks if a string is present in a slice of strings.
+func contains(slice []string, str string) bool {
+	for _, item := range slice {
+		if item == str {
+			return true
+		}
+	}
+	return false
+}
+
+// singularize attempts to convert a plural noun to its singular form.
+// This is a basic implementation and may not correctly handle all plural forms.
+func singularize(word string) string {
+	// Basic rules for regular plural forms
+	if strings.HasSuffix(word, "ies") {
+		return strings.TrimSuffix(word, "ies") + "y"
+	} else if strings.HasSuffix(word, "ves") {
+		return strings.TrimSuffix(word, "ves") + "f"
+	} else if strings.HasSuffix(word, "s") {
+		// Assumes words ending in 's' are plural
+		return strings.TrimSuffix(word, "s")
+	}
+
+	// Return the word if no rules apply
+	return word
+}
+
+// uppercaseFirst converts the first letter of the string to uppercase.
+func uppercaseFirst(s string) string {
+	if s == "" {
+		return ""
+	}
+	r, size := utf8.DecodeRuneInString(s)
+	return string(unicode.ToUpper(r)) + s[size:]
 }
