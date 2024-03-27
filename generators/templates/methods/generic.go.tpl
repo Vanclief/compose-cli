@@ -6,7 +6,7 @@ import (
 	validation "github.com/go-ozzo/ozzo-validation"
 	"github.com/vanclief/ez"
 
-	"{{.ModulePath}}/application/models/{{.PackageName}}"
+	"{{.ModulePath}}/application/models"
 )
 
 type {{.MethodName}}Request struct {}
