@@ -1,9 +1,7 @@
 package generators
 
 import (
-	"bufio"
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/fatih/color"
@@ -19,29 +17,34 @@ const (
 func NewResourceAPI() error {
 	const op = "generators.NewResourceAPI"
 
-	color.Cyan("Generate a new resource")
+	color.Blue("Generate API for resource")
 
 	// Check the folder exists
 	err := dirExists(RESOURCES_PATH)
 	if err != nil {
-		errMsg := fmt.Sprintf(`Resources folder "%s" doesn't exist`, RESOURCES_PATH)
-		return ez.New(op, ez.ECONFLICT, errMsg, err)
+		errMsg := fmt.Sprintf(`Resources folder "%s" doesn't exist do you want to create it?`, RESOURCES_PATH)
+
+		createDirectory, errConf := getUserConfirmation(errMsg)
+		if errConf != nil || !createDirectory {
+			return ez.New(op, ez.ECONFLICT, errMsg, err)
+		}
+
+		err = createDir(RESOURCES_PATH)
+		if err != nil {
+			return ez.New(op, ez.ECONFLICT, errMsg, err)
+		}
 	}
 
 	// Get the resource name
-	color.Yellow("Enter resource name (plural): ")
-	reader := bufio.NewReader(os.Stdin)
-	resourceName, err := reader.ReadString('\n')
+	resourceName, err := getUserInput("Enter resource name (plural)")
 	if err != nil {
 		return ez.New(op, ez.EINTERNAL, "Error reading input", err)
 	}
 
-	resourceName = strings.ToLower(strings.TrimSpace(resourceName))
-	color.Cyan("Generating new resource for %s\n", resourceName)
+	color.Blue("Generating API for %s\n", resourceName)
 
 	// Create the resource folder
 	dirPath := fmt.Sprintf("%s/%s", RESOURCES_PATH, resourceName)
-
 	err = createDir(dirPath)
 	if err != nil {
 		return ez.Wrap(op, err)
@@ -78,6 +81,8 @@ func NewResourceAPI() error {
 	if err != nil {
 		return ez.Wrap(op, err)
 	}
+
+	color.Green("Succesfully generated API for %s\n", resourceName)
 
 	return nil
 }

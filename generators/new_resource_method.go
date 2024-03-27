@@ -1,11 +1,9 @@
 package generators
 
 import (
-	"bufio"
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/fatih/color"
 	"github.com/vanclief/compose-cli/generators/templates"
@@ -15,7 +13,7 @@ import (
 func NewResourceMethod(force bool) error {
 	const op = "generators.NewResourceMethod"
 
-	color.Cyan("Generate a new resource method")
+	color.Blue("Generate a new resource method")
 
 	// Check the folder exists
 	err := dirExists(RESOURCES_PATH)
@@ -42,34 +40,30 @@ func NewResourceMethod(force bool) error {
 	})
 
 	// Print the directories
-	color.Cyan("Existing resources:")
-	for _, dir := range dirs {
-		fmt.Println(dir)
+	color.Blue("Existing resources:")
+	for i, dir := range dirs {
+		line := fmt.Sprintf("(%d) %s", i+1, dir)
+		fmt.Println(line)
 	}
 
 	// Get the resource name
-	color.Yellow("Enter resource name: ")
-	reader := bufio.NewReader(os.Stdin)
-	resourceName, err := reader.ReadString('\n')
+	resourceName, err := getUserInput("Enter resource name from list")
 	if err != nil {
 		return ez.New(op, ez.EINTERNAL, "Error reading input", err)
 	}
 
-	resourceName = strings.ToLower(strings.TrimSpace(resourceName))
 	if !contains(dirs, resourceName) {
-		return ez.New(op, ez.EINVALID, "Resource name doesn't exist, select one from the list", nil)
+		errMsg := fmt.Sprintf("Resource %s does not exist in the list, create it first")
+		return ez.New(op, ez.EINVALID, errMsg, nil)
 	}
 
 	// Get the method
 	methods := []string{"list", "get", "create", "update", "delete"}
 
-	color.Yellow("Enter resource method: ")
-	reader = bufio.NewReader(os.Stdin)
-	resourceMethod, err := reader.ReadString('\n')
+	resourceMethod, err := getUserInput("Enter resource method (i.e. create)")
 	if err != nil {
 		return ez.New(op, ez.EINTERNAL, "Error reading input", err)
 	}
-	resourceMethod = strings.ToLower(strings.TrimSpace(resourceMethod))
 
 	var templateName string
 	if !contains(methods, resourceMethod) {
@@ -84,7 +78,7 @@ func NewResourceMethod(force bool) error {
 		return ez.Wrap(op, err)
 	}
 
-	color.Cyan("Generating %s method for %s\n", resourceMethod, resourceName)
+	color.Blue("Generating %s method for %s\n", resourceMethod, resourceName)
 	filePath := fmt.Sprintf("%s/%s/%s.go", RESOURCES_PATH, resourceName, resourceMethod)
 
 	methodData := templates.MethodData{
@@ -128,12 +122,21 @@ func NewResourceMethod(force bool) error {
 		return nil
 	}
 
-	color.Cyan("Generating %s handler for %s\n", resourceMethod, resourceName)
+	color.Blue("Generating %s handler for %s\n", resourceMethod, resourceName)
 
 	err = dirExists(REST_HANDLER_PATH)
 	if err != nil {
-		errMsg := fmt.Sprintf(`Handler folder "%s" doesn't exist`, REST_HANDLER_PATH)
-		return ez.New(op, ez.ECONFLICT, errMsg, err)
+		errMsg := fmt.Sprintf(`Handler folder "%s" doesn't exist do you want to create it?`, REST_HANDLER_PATH)
+
+		createDirectory, errConf := getUserConfirmation(errMsg)
+		if errConf != nil || !createDirectory {
+			return ez.New(op, ez.ECONFLICT, errMsg, err)
+		}
+
+		err = createDir(REST_HANDLER_PATH)
+		if err != nil {
+			return ez.New(op, ez.ECONFLICT, errMsg, err)
+		}
 	}
 
 	filePath = fmt.Sprintf("%s/%s.go", REST_HANDLER_PATH, resourceName)
@@ -159,6 +162,8 @@ func NewResourceMethod(force bool) error {
 	if err != nil {
 		return ez.Wrap(op, err)
 	}
+
+	color.Green("Succesfully generated method %s for %s\n", resourceMethod, resourceName)
 
 	return nil
 }

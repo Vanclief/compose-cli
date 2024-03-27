@@ -38,3 +38,19 @@ func getUserConfirmation(prompt string) (bool, error) {
 		}
 	}
 }
+
+func getUserInput(prompt string) (string, error) {
+	const op = "getUserInput"
+
+	color.Yellow(fmt.Sprintf("%s: ", prompt))
+
+	reader := bufio.NewReader(os.Stdin)
+	input, err := reader.ReadString('\n')
+	if err != nil {
+		return "", ez.New(op, ez.EINTERNAL, "Error reading user input", err)
+	}
+
+	input = strings.ToLower(strings.TrimSpace(input))
+
+	return input, nil
+}
