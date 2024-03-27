@@ -38,7 +38,7 @@ func NewResourceModel() error {
 	color.Blue("Generating Model for %s\n", modelName)
 
 	// Create the model File
-	filePath := fmt.Sprintf("%s/%s.go", MODELS_PATH, modelName)
+	filePath := fmt.Sprintf("%s/%s.go", MODELS_PATH, singularize(modelName))
 
 	modelData := templates.ModelData{
 		PackageName: modelName,
