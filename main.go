@@ -13,6 +13,7 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "compose-cli"
 	app.Usage = "Create boilerplate for your compose based application"
+	app.Version = "1.0.1"
 
 	app.Commands = []*cli.Command{
 		{
@@ -49,15 +50,14 @@ func main() {
 						},
 					},
 				},
+				{
+					Name:  "model",
+					Usage: "Generate a new Model for a resource",
+					Action: func(c *cli.Context) error {
+						return generators.NewResourceModel()
+					},
+				},
 			},
-			// Action: func(c *cli.Context) error {
-			// reader := bufio.NewReader(os.Stdin)
-			// fmt.Print("Enter something to generate: ")
-			// input, _ := reader.ReadString('\n')
-			// fmt.Printf("Generating something for: %s\n", input)
-			// Add your generation logic here
-			// return nil
-			// },
 		},
 	}
 

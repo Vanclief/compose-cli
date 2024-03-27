@@ -21,4 +21,5 @@ import "embed"
 //go:embed handlers/list.go.tpl
 //go:embed handlers/update.go.tpl
 
+//go:embed models/model.go.tpl
 var FS embed.FS

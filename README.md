@@ -20,6 +20,10 @@ Generate a new method for a resource API:
 
 `compose-cli generate resource method`
 
+Generate a new model:
+
+`compose-cli generate model`
+
 Arguments
 
 - `-f | --force` overwrite existing files with generated template

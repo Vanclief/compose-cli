@@ -26,3 +26,8 @@ type MethodTestData struct {
 	SuiteName   string
 	TestFunc    string
 }
+
+type ModelData struct {
+	PackageName string // codes
+	ModelStruct string // Code
+}
