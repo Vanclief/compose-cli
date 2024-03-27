@@ -25,8 +25,8 @@ func main() {
 					Usage: "Generate an API resource file",
 					Subcommands: []*cli.Command{
 						{
-							Name:  "new",
-							Usage: "Generate a new API resource",
+							Name:  "api",
+							Usage: "Generate a new API for a resource",
 							Action: func(c *cli.Context) error {
 								return generators.NewResourceAPI()
 							},

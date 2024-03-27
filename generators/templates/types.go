@@ -12,13 +12,12 @@ type APITestData struct {
 }
 
 type MethodData struct {
-	PackageName   string
-	ModulePath    string
-	ModelPackage  string
-	ModelStruct   string
-	ModelVariable string
-	ModelSlice    string
-	MethodName    string
+	PackageName   string // codes
+	ModulePath    string // go.mod path
+	ModelStruct   string // Code
+	ModelVariable string // code
+	ModelSlice    string // Codes
+	MethodName    string // Create
 }
 
 type MethodTestData struct {

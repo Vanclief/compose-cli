@@ -6,13 +6,12 @@ import (
 	validation "github.com/go-ozzo/ozzo-validation"
 	"github.com/vanclief/ez"
 
-	"{{.ModulePath}}/application/resources/models/{{.ModelPackage}}"
+	"{{.ModulePath}}/application/resources/models/{{.PackageName}}"
 )
 
 type {{.MethodName}}Request struct {
 	{{.ModelStruct}}ID     int64  `json:"{{.ModelVariable}}_id"`
 }
-
 
 func (r {{.MethodName}}Request) Validate() error {
 	const op = "{{.MethodName}}Request.Validate"
@@ -27,8 +26,8 @@ func (r {{.MethodName}}Request) Validate() error {
 	return nil
 }
 
-func (api *API) {{.MethodName}}(ctx context.Context, requester *models.User, request *{{.MethodName}}Request) (int64, error) {
+func (api *API) {{.MethodName}}(ctx context.Context, requester *models.User, request *{{.MethodName}}Request) (*models.{{.ModelStruct}}, error) {
 	const op = "API.{{.MethodName}}"
 
-	return 0, nil
+	return nil, nil
 }

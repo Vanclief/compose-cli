@@ -104,6 +104,35 @@ func createFileFromTemplate(filePath, templatePath string, templateData interfac
 	return nil
 }
 
+func appendFileFromTemplate(filePath, templatePath string, templateData interface{}) error {
+	const op = "generators.appendFileFromTemplate"
+
+	// Parse the template
+	tmpl, err := template.ParseFS(templates.FS, templatePath)
+	if err != nil {
+		errMsg := fmt.Sprintf("Error parsing template: %v", err)
+		return ez.New(op, ez.EINTERNAL, errMsg, err)
+	}
+
+	var f *os.File
+	// Open the file in append mode if it exists, create it otherwise.
+	f, err = os.OpenFile(filePath, os.O_APPEND|os.O_WRONLY, 0644)
+	if err != nil {
+		errMsg := fmt.Sprintf("Error opening or creating file: %v", err)
+		return ez.New(op, ez.EINTERNAL, errMsg, err)
+	}
+	defer f.Close()
+
+	// Execute the template, writing to the file.
+	err = tmpl.Execute(f, templateData)
+	if err != nil {
+		errMsg := fmt.Sprintf("Error executing template: %v", err)
+		return ez.New(op, ez.EINTERNAL, errMsg, err)
+	}
+
+	return nil
+}
+
 // contains checks if a string is present in a slice of strings.
 func contains(slice []string, str string) bool {
 	for _, item := range slice {

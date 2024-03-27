@@ -90,14 +90,13 @@ func NewResourceMethod(force bool) error {
 	methodData := templates.MethodData{
 		PackageName:   resourceName,
 		ModulePath:    modulePath,
-		ModelPackage:  resourceName,
 		ModelStruct:   uppercaseFirst(singularize(resourceName)),
 		ModelVariable: singularize(resourceName),
 		ModelSlice:    uppercaseFirst(resourceName),
 		MethodName:    uppercaseFirst(resourceMethod),
 	}
 
-	templatePath := fmt.Sprintf("%s.go.tpl", templateName)
+	templatePath := fmt.Sprintf("methods/%s.go.tpl", templateName)
 	err = createFileFromTemplate(filePath, templatePath, methodData, force)
 	if err != nil {
 		return ez.Wrap(op, err)
@@ -113,8 +112,50 @@ func NewResourceMethod(force bool) error {
 		TestFunc:    methodData.MethodName + "Suite",
 	}
 
-	templatePath = "generic_test.go.tpl"
+	templatePath = "methods/generic_test.go.tpl"
 	err = createFileFromTemplate(filePath, templatePath, apiTestData, force)
+	if err != nil {
+		return ez.Wrap(op, err)
+	}
+
+	// Check if the user wants to create a handler
+	createHandler, err := getUserConfirmation("Do you want to create a handler?")
+	if err != nil {
+		return ez.Wrap(op, err)
+	}
+
+	if !createHandler {
+		return nil
+	}
+
+	color.Cyan("Generating %s handler for %s\n", resourceMethod, resourceName)
+
+	err = dirExists(REST_HANDLER_PATH)
+	if err != nil {
+		errMsg := fmt.Sprintf(`Handler folder "%s" doesn't exist`, REST_HANDLER_PATH)
+		return ez.New(op, ez.ECONFLICT, errMsg, err)
+	}
+
+	filePath = fmt.Sprintf("%s/%s.go", REST_HANDLER_PATH, resourceName)
+
+	// Check if the file already exists
+	fileExists := true
+	if _, err := os.Stat(filePath); err != nil {
+		if os.IsNotExist(err) {
+			fileExists = false
+		}
+	}
+
+	if !fileExists {
+		templatePath = "handlers/imports.go.tpl"
+		err = createFileFromTemplate(filePath, templatePath, methodData, false)
+		if err != nil {
+			return ez.Wrap(op, err)
+		}
+	}
+
+	templatePath = fmt.Sprintf("handlers/%s.go.tpl", templateName)
+	err = appendFileFromTemplate(filePath, templatePath, methodData)
 	if err != nil {
 		return ez.Wrap(op, err)
 	}

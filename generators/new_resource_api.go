@@ -11,7 +11,10 @@ import (
 	"github.com/vanclief/ez"
 )
 
-const RESOURCES_PATH = "application/resources"
+const (
+	RESOURCES_PATH    = "application/resources"
+	REST_HANDLER_PATH = "interfaces/rest/handler"
+)
 
 func NewResourceAPI() error {
 	const op = "generators.NewResourceAPI"
@@ -57,7 +60,7 @@ func NewResourceAPI() error {
 		ModulePath:  modulePath,
 	}
 
-	err = createFileFromTemplate(filePath, "api.go.tpl", apiData, false)
+	err = createFileFromTemplate(filePath, "api/api.go.tpl", apiData, false)
 	if err != nil {
 		return ez.Wrap(op, err)
 	}
@@ -71,7 +74,7 @@ func NewResourceAPI() error {
 		SuiteName:   strings.ToUpper(resourceName[:1]) + resourceName[1:] + "Suite",
 	}
 
-	err = createFileFromTemplate(filePath, "api_test.go.tpl", apiTestData, false)
+	err = createFileFromTemplate(filePath, "api/api_test.go.tpl", apiTestData, false)
 	if err != nil {
 		return ez.Wrap(op, err)
 	}
