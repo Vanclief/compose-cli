@@ -183,7 +183,7 @@ func NewResourceMethod(force bool) error {
 		PackageName: resourceName,
 		ModulePath:  modulePath,
 		SuiteName:   uppercaseFirst(resourceName) + "Suite",
-		TestFunc:    methodData.MethodName + "Suite",
+		TestFunc:    "Test" + methodData.MethodName,
 	}
 
 	templatePath = "methods/generic_test.go.tpl"
