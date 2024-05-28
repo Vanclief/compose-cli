@@ -13,7 +13,7 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "compose-cli"
 	app.Usage = "Create boilerplate for your compose based application"
-	app.Version = "1.0.3"
+	app.Version = "1.0.4"
 
 	app.Commands = []*cli.Command{
 		{

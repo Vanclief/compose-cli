@@ -13,14 +13,14 @@ import (
 )
 
 type ListRequest struct {
-	requests.StandardList
+	requests.KeysetBasedList
     Search      string `json:"search"`
 }
 
 func (r ListRequest) Validate() error {
 	const op = "ListRequest.Validate"
 
-	err := r.StandardList.Validate()
+	err := r.KeysetBasedList.Validate()
 	if err != nil {
 		return ez.Wrap(op, err)
 	}
@@ -37,29 +37,33 @@ func (r ListRequest) Validate() error {
 }
 
 type ListResponse struct {
-	responses.StandardList
+	responses.KeysetBasedList
 	{{.ModelSlice}} []models.{{.ModelStruct}} `json:"{{.PackageName}}"`
 }
 
 func (api *API) List(ctx context.Context, requester *models.User, request *ListRequest) (*ListResponse, error) {
 	const op = "API.List"
 
-    var count int
 	{{.PackageName}}List := []models.{{.ModelStruct}}{}
 
 	response := &ListResponse{
-		StandardList: responses.StandardList{
-			Limit:      request.Limit,
-			Offset:     request.Offset,
-			TotalCount: count,
+		KeysetBasedList: responses.KeysetBasedList{
+			Limit: request.Limit,
 		},
 		{{.ModelSlice}}: {{.PackageName}}List,
 	}
 
-	err := response.GenerateHash(response.{{.ModelSlice}})
+	responseLength, err := response.FinalizeResponse({{.PackageName}}List, len({{.PackageName}}List))
 	if err != nil {
 		return nil, ez.Wrap(op, err)
 	}
+
+	{{.PackageName}}List = {{.PackageName}}List[:responseLength]
+	if response.HasNextPage {
+		response.NextCursor = {{.PackageName}}List[len({{.PackageName}}List)-1].GetCursor()
+	}
+
+	response.{{.ModelSlice}} = {{.PackageName}}List
 
 	return response, nil
 }

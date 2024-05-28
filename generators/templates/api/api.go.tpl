@@ -3,11 +3,11 @@ package {{.PackageName}}
 import (
 	"{{.ModulePath}}/application/resources/shared"
 	"{{.ModulePath}}/controller"
-	"{{.ModulePath}}/interfaces/database"
+	"github.com/vanclief/compose/interfaces/databases/relational"
 )
 
 type API struct {
-	DB          *database.DB
+	DB          *relational.DB
 	SharedAPI   *shared.API
 }
 

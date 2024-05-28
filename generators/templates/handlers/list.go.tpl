@@ -10,9 +10,9 @@ func (h *Handler) List{{.ModelSlice}}(c echo.Context) error {
 
 	requestBody := &{{.PackageName}}.ListRequest{
 		ParentID: parentID,
-		StandardList: requests.StandardList{
+        KeysetBasedList: requests.KeysetBasedList{
 			Limit:  h.GetListLimit(c, 50),
-			Offset: h.GetListOffest(c, 0),
+			Cursor: c.QueryParam("cursor"),
 		},
 		Search: c.QueryParam("search"),
 	}

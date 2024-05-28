@@ -5,12 +5,12 @@ import (
 
 	"github.com/stretchr/testify/suite"
 
-	"{{.ModulePath}}/application/resources/shared"
+	"{{.ModulePath}}/application/resources/shared/test"
 )
 
 type {{.SuiteName}} struct {
 	suite.Suite
-	shared.TestSuite
+	test.TestSuite
 	api *API
 }
 
